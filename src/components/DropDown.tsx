@@ -24,7 +24,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selected, onSelect, label 
         setIsOpen(false);
       }
     };
-
+    
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

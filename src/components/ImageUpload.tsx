@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from "react"; // Importing necessary React hooks (useState) for state management
+import React from "react"; // Importing necessary React hooks (useState) for state management
 import Image from "next/image"; // Importing the Image component from Next.js for optimized image handling
 
 type ImageUploadProps = {
@@ -9,14 +8,14 @@ type ImageUploadProps = {
   setImages: React.Dispatch<React.SetStateAction<File[]>>; // Function to update the images state
 };
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ label = "Upload Images", maxImages = 5 }) => {
-  const [images, setImages] = useState<File[]>([]); // State to manage uploaded images, initialized as an empty array
+const ImageUpload: React.FC<ImageUploadProps> = ({ label = "Upload Images", maxImages = 5, setImages, images }) => {
+//   const [images, setImages] = useState<File[]>([]); // State to manage uploaded images, initialized as an empty array
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return; // If no files are selected, exit the function
     // Convert FileList (from input) to an array, and limit the number of files based on maxImages
     const newImages = Array.from(e.target.files).slice(0, maxImages - images.length);
-
+    // console.log(images)
     // Update the state with the newly selected images, ensuring no more than maxImages are selected
     setImages((prev) => [...prev, ...newImages].slice(0, maxImages)); 
   };

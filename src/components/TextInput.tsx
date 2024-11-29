@@ -7,7 +7,7 @@ type InputProps = {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   label?: string;
-  multiLine?: boolean; // New prop to enable multiline input
+  multiLine?: boolean; // prop to enable multiline input
   rows?: number; // Number of rows for the multiline textarea
 };
 
