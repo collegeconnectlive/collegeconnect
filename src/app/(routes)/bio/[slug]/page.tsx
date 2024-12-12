@@ -14,7 +14,7 @@ export default async function Page({ params }: PageProps) {
   const schools = await FetchSchools(); // Fetch the schools on the server
   const school = await FetchSchool(slug)
   return (
-    <div className="h-[100%] bg-gradient-to-tr from-rose-100 to-teal-100 z-20">
+    <div className="h-[100%] bg-gradient-to-tr from-rose-100 to-teal-100">
       <HomeScreen schools={schools} school = {school} />
     </div>
   );
