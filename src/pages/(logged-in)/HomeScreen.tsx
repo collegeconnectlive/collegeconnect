@@ -7,12 +7,19 @@ import ImageUpload from "@/components/ImageUpload";
 import { FormSubmit } from "@/utils/FormSubmit";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
+import PhoneNumberInput from "@/components/PhoneNumberInput";
 
-const schools = ["Santa Cruz", "uPitt", "Option 3"];
-const HomeScreen: React.FC = () => {
+type HomeScreenProps = {
+  schools: string[];
+  school: string | null;
+};
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   const [message, setMessage] = useState(""); // For displaying success/error message
   const [name, setName] = useState("");
   const [caption, setCaption] = useState("");
+  const [phone, setPhone] = useState("");
+  const [snap, setSnap] =  useState("");
   const [ig, setIG] = useState("");
   const [dropdownValue, setDropdownValue] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -24,6 +31,8 @@ const HomeScreen: React.FC = () => {
       name,
       caption,
       ig,
+      snap,
+      phone,
       school: dropdownValue,
       images,
     };
@@ -58,6 +67,7 @@ const HomeScreen: React.FC = () => {
       <Dropdown
         label="Select Your School"
         options={schools}
+        option = {school}
         selected={dropdownValue}
         onSelect={setDropdownValue}
       />
@@ -69,22 +79,26 @@ const HomeScreen: React.FC = () => {
         multiLine
         rows={6}
       />
-      <div className="flex flex-col space-y-2">
-        <label className="text-gray-700 font-medium">Instagram</label>
-        <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-            @
-          </span>
-          <input
-            type="text"
-            placeholder="your handle ..."
-            value={ig}
-            onChange={(e) => setIG(e.target.value)}
-            className="pl-10 outline-none px-4 py-2 w-full border border-gray-300 rounded focus:ring-2 focus:ring-black"
-          />
-        </div>
-      </div>
-
+      <TextInput
+        label="Instagram"
+        placeholder="your handle ..."
+        prefix="@"
+        value={ig}
+        onChange={(e) => setIG(e.target.value)}
+      />
+      <TextInput
+        label="Snapchat"
+        placeholder="your handle ..."
+        prefix="@"
+        value={snap}
+        onChange={(e) => setSnap(e.target.value)}
+      />
+      <PhoneNumberInput
+        label="Phone number"
+        placeholder="(123) 456-7890"
+        value={phone}
+        onChange={setPhone}
+      />
       <ImageUpload
         label="Upload Your Pictures"
         maxImages={5}

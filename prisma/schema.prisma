@@ -11,16 +11,20 @@ datasource db {
 }
 
 model University {
-  id       String    @id @default(uuid())
+  id       String    @id @default(cuid())
   name     String    @unique
+  slug     String    @unique
   location String?
   students Student[] // One-to-many relationship with Student
 }
 
 model Student {
-  id           String     @id @default(uuid())
+  id           String     @id @default(cuid())
   name         String
   bio          String?
+  ig           String?
+  snap         String?
+  email        String?
   phoneNumber  String
   universityId String
   university   University @relation(fields: [universityId], references: [id])
@@ -28,7 +32,7 @@ model Student {
 }
 
 model Photo {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   url       String
   studentId String
   student   Student  @relation(fields: [studentId], references: [id])

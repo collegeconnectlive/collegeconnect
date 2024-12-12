@@ -1,36 +1,80 @@
 type FormDataType = {
   name: string;
   caption: string;
-  ig: string;
+  ig?: string;
+  snap?: string;
+  phone?: string;
   school: string;
   images: File[];
   message?: string;
 };
 
+type FormSubmitResponse = {
+  message: string; // Explicitly define that the response includes a message
+};
+
 export const FormSubmit = async (
   state: FormDataType
-): Promise<FormDataType> => {
-  const { name, caption, ig, school, images } = state;
+): Promise<FormSubmitResponse> => {
+  const { name, caption, ig, snap, phone, school, images } = state;
 
-  // Create a FormData object to handle files and other fields
-  const formData = new FormData();
-  formData.append("name", name);
-  formData.append("caption", caption);
-  formData.append("ig", ig);
-  formData.append("school", school);
+  try {
+    // Step 1: Upload Images to S3 and get URLs
+    const imageUploadFormData = new FormData();
+    images.forEach((image) => imageUploadFormData.append("images", image));
+    imageUploadFormData.append("school", school); // switch this to id
 
-  // Append each image to the FormData object
-  images.forEach((image) => {
-    formData.append("images", image);
-  });
+    const s3Response = await fetch("/api/s3-upload", {
+      method: "POST",
+      body: imageUploadFormData,
+    });
 
-  // Send the FormData object via fetch
-  const res = await fetch("http://localhost:3000/api/s3-upload", {
-    method: "POST",
-    body: formData, // FormData is automatically serialized
-  });
+    if (!s3Response.ok) {
+      throw new Error("Failed to upload images to S3");
+    }
 
-  // Assuming the response includes a message field for success or error
-  const data = await res.json();
-  return { ...state, message: data.message || "Form submitted successfully!" };
+    const { fileUrls } = await s3Response.json();
+
+    // Step 2: Validate Images
+    const awsRekResponse = await fetch("/api/verify-images", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fileUrls }),
+    });
+
+    if (!awsRekResponse.ok) {
+      throw new Error("Failed to validate images");
+    }
+
+    const { validUrls } = await awsRekResponse.json();
+
+    // Step 3: Submit Form Data with URLs to Prisma
+    const formData = {
+      name,
+      caption,
+      ig,
+      snap,
+      phone,
+      school,
+      validUrls,
+    };
+
+    const formResponse = await fetch("/api/submit-form", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (!formResponse.ok) {
+      throw new Error("Failed to submit form data");
+    }
+
+    const result = await formResponse.json();
+    return { message: result.message || "Form submitted successfully!" };
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    return { message: "You must fillout all fields!" };
+  }
 };

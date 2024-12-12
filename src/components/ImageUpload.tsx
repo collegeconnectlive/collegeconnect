@@ -2,15 +2,18 @@ import React from "react"; // Importing necessary React hooks (useState) for sta
 import Image from "next/image"; // Importing the Image component from Next.js for optimized image handling
 
 type ImageUploadProps = {
-  label?: string; // Optional label prop to display a custom label above the upload area
-  maxImages?: number; // Optional prop to limit the number of images that can be uploaded
-  images: File[]; // Array of images (File objects)
-  setImages: React.Dispatch<React.SetStateAction<File[]>>; // Function to update the images state
+  label?: string; // Optional label prop
+  maxImages?: number; // Maximum number of images
+  images: File[]; // Array of File objects
+  setImages: React.Dispatch<React.SetStateAction<File[]>>; // Function to update the images
 };
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ label = "Upload Images", maxImages = 5, setImages, images }) => {
-//   const [images, setImages] = useState<File[]>([]); // State to manage uploaded images, initialized as an empty array
-
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  label = "Upload Images",
+  maxImages = 5,
+  images = [], // Default to an empty array if undefined
+  setImages,
+}) => {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return; // If no files are selected, exit the function
     // Convert FileList (from input) to an array, and limit the number of files based on maxImages
@@ -30,7 +33,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ label = "Upload Images", maxI
       {label && <label className="text-gray-700 font-medium">{label}</label>} {/* Display label if provided */}
       <div className="border border-gray-300 rounded p-4"> {/* Container for the image upload area */}
         <div className="flex flex-wrap gap-4"> {/* Flexbox container to wrap the images and upload button */}
-          {images.map((image, index) => (
+          {images?.map((image, index) => (
             // Iterate over the images array to display each uploaded image
             <div key={index} className="relative w-24 h-24"> 
               {/* Image container with fixed dimensions */}

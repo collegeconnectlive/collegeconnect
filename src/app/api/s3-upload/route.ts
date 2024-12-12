@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { extname } from "path";
 
 // Validate environment variables
 if (
@@ -20,12 +21,28 @@ const s3Client = new S3Client({
   },
 });
 
+// Function to determine the ContentType based on the file extension
+function getContentType(fileName: string): string {
+  const ext = extname(fileName).toLowerCase();
+  switch (ext) {
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    default:
+      throw new Error(`Unsupported file type: ${ext}`);
+  }
+}
+
 // Function to upload file to S3
 async function uploadFileToS3(
   buffer: Buffer,
   fileName: string,
   school: string
 ): Promise<string> {
+  const contentType = getContentType(fileName); // Determine content type
+
   try {
     const bucketName = process.env.AWS_S3_BUCKET_NAME as string;
 
@@ -34,11 +51,10 @@ async function uploadFileToS3(
       Bucket: bucketName,
       Key: `${school}/${fileName}`, // Add school name to the key
       Body: buffer,
-      ContentType: "image/jpg",
+      ContentType: contentType,
     };
 
     await s3Client.send(new PutObjectCommand(uploadParams));
-    console.log(fileName);
     // Return the file URL or key
     return `https://${bucketName}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${school}/${fileName}`;
   } catch (error) {
@@ -82,9 +98,13 @@ export async function POST(req: Request) {
       return uploadFileToS3(buffer, fileName, school);
     });
 
-    const fileUrls = await Promise.all(uploadPromises); // Wait for all uploads to finish
+    // Wait for all uploads to finish
+    const fileUrls = await Promise.all(uploadPromises);
 
-    return NextResponse.json({ success: true, fileUrls });
+    // Encode URLs before returning them
+    // const encodedFileUrls = fileUrls.map((url) => encodeURIComponent(url));
+
+    return NextResponse.json({ success: true, fileUrls: fileUrls });
   } catch (error) {
     console.error("Error in POST handler:", error);
     return NextResponse.json(
