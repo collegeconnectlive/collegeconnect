@@ -1,13 +1,18 @@
 import prisma from "@/lib/db";
 
-export async function FetchSchool(slug: string): Promise<string | null> {
+interface SchoolData {
+  id: string;
+  name: string;
+}
+
+export async function FetchSchool(slug: string): Promise<SchoolData | null> {
   if (!slug || typeof slug !== "string") {
     throw new Error("Invalid slug parameter");
   }
 
   try {
     const school = await prisma.university.findUnique({
-      select: { name: true },
+      select: { id: true, name: true },
       where: { slug },
     });
 
@@ -16,7 +21,7 @@ export async function FetchSchool(slug: string): Promise<string | null> {
       return null;
     }
 
-    return school.name;
+    return { id: school.id, name: school.name };
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error("Error fetching school:", error.message, {

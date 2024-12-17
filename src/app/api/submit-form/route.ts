@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { postToInstagram } from "./(InstagramAPIs)/InstagramPostAPI";
+import prisma from "@/lib/db";
 
-const prisma = new PrismaClient();
 // Rekognition client setup with explicit credentials
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, caption, ig, snap, school, phone, validUrls } = body;
-    console.log(body);
-    if (!name || !school || !validUrls || validUrls.length === 0) {
+    const { name, phone, email, caption, ig, snap, schoolID, validUrls } = body;
+
+    if (!name || !schoolID || !validUrls || validUrls.length === 0) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -22,13 +21,13 @@ export async function POST(req: Request) {
       data: {
         name,
         bio: caption,
-        phoneNumber: phone, // Assuming IG handle is stored here
+        phoneNumber: phone,
+        email: email,
         ig: ig,
         snap: snap,
         university: {
-          connectOrCreate: {
-            where: { name: school },
-            create: { name: school },
+          connect: {
+            id: schoolID, // Ensure this field is unique or has a unique constraint
           },
         },
         photos: {
@@ -36,13 +35,21 @@ export async function POST(req: Request) {
         },
       },
     });
-
+    console.log("in Submit Form, school id is: ", schoolID);
     // Call Instagram posting function if conditions are met
     if (validUrls.length > 0) {
       try {
         const instagramResponse = await postToInstagram({
-          caption: `${name}: ${caption}`,
+          caption:
+            ig && snap
+              ? `${caption}\n\nInstagram: @${ig}\nSnapchat: ${snap}`
+              : ig
+              ? `${caption}\n\nInstagram: @${ig}`
+              : snap
+              ? `${caption}\n\nSnapchat: ${snap}`
+              : `${caption}`,
           images: validUrls,
+          schoolID: schoolID,
         });
 
         return NextResponse.json({

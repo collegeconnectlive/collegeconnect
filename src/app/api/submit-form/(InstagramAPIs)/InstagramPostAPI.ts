@@ -3,16 +3,17 @@ import postSingleImage from "./postSingleImage";
 
 const API_VERSION = "v21.0"; // Replace with the latest version
 const PAGE_ACCESS_TOKEN =
-  "EAAMZAshxqcZAMBOZC85lUFRNEsQ8ZBptTZAYiDT0kXfdYP8jKZCsF30DhkuISc7yu73bZBfARaQWxgTXcFIJwj38gMxGv6SDNe7azhy6pHn536d0yxlKIhiJpZBN2N8EUgw8xOJ4hJWxJgfbZBKiv6LrUmBBzNz4KZCm63v9t9oZAVtKqQIMxa3CcHFDHFz"; // Store securely in your .env file
-const IG_USER_ID = "17841470713645375"; // The Instagram User ID
+  "EAAd7hi61tAEBOZB1tboHwekMhQr62tVjkZAdsxtwSLA98yVN7oKrZCzaPlqfmU7KymblApMO0cvAGiFry2ND27QVxHAxkpRqZAdpmN9AGrtTlxTwmZAUnYuKJbeaMisn8IlS3ZBZAs35sfyzOl69t5JIgZCZCAPBMv64UtBCSrUTmYGJek18p7DrmK4ZAeVSBVHq03KhtjhZCB8h09CqerujS03QrkwOZCWTMqwj1QZDZD"; // Store securely in your .env file
+// const IG_USER_ID = "17841471051295669"; // The Instagram User ID
 
 type MediaPayload = {
   caption: string;
   images: string[]; // Array of image files
+  schoolID: string;
 };
 
 export const postToInstagram = async (media: MediaPayload) => {
-  const { caption, images } = media;
+  const { caption, images, schoolID } = media;
 
   if (!images || images.length === 0) {
     throw new Error("At least 1 image is required to post.");
@@ -23,7 +24,7 @@ export const postToInstagram = async (media: MediaPayload) => {
     return await postSingleImage(
       caption,
       images[0],
-      IG_USER_ID,
+      schoolID,
       API_VERSION,
       PAGE_ACCESS_TOKEN
     );
@@ -33,7 +34,7 @@ export const postToInstagram = async (media: MediaPayload) => {
   return await postCarousel(
     caption,
     images,
-    IG_USER_ID,
+    schoolID,
     API_VERSION,
     PAGE_ACCESS_TOKEN
   );

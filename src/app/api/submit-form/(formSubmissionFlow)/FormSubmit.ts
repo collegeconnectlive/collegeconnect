@@ -3,8 +3,9 @@ type FormDataType = {
   caption: string;
   ig?: string;
   snap?: string;
+  email?: string;
   phone?: string;
-  school: string;
+  schoolID: string;
   images: File[];
   message?: string;
 };
@@ -16,13 +17,13 @@ type FormSubmitResponse = {
 export const FormSubmit = async (
   state: FormDataType
 ): Promise<FormSubmitResponse> => {
-  const { name, caption, ig, snap, phone, school, images } = state;
+  const { name, phone, email, caption, ig, snap, schoolID, images } = state;
 
   try {
     // Step 1: Upload Images to S3 and get URLs
     const imageUploadFormData = new FormData();
     images.forEach((image) => imageUploadFormData.append("images", image));
-    imageUploadFormData.append("school", school); // switch this to id
+    imageUploadFormData.append("school", schoolID); // switch this to id
 
     const s3Response = await fetch("/api/s3-upload", {
       method: "POST",
@@ -53,11 +54,12 @@ export const FormSubmit = async (
     // Step 3: Submit Form Data with URLs to Prisma
     const formData = {
       name,
+      phone,
+      email,
       caption,
       ig,
       snap,
-      phone,
-      school,
+      schoolID,
       validUrls,
     };
 

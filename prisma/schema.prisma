@@ -11,7 +11,7 @@ datasource db {
 }
 
 model University {
-  id       String    @id @default(cuid())
+  id       String    @id
   name     String    @unique
   slug     String    @unique
   location String?
@@ -21,7 +21,7 @@ model University {
 model Student {
   id           String     @id @default(cuid())
   name         String
-  bio          String?
+  bio          String
   ig           String?
   snap         String?
   email        String?

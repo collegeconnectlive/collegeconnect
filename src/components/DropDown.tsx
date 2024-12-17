@@ -1,22 +1,36 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 
+type Option = {
+  value: string;
+  label: string;
+};
+
 type DropdownProps = {
-  options: string[];
-  option?: string | null; // Predefined option, optional
+  options?: Option[] | null;
   selected: string;
   onSelect: (value: string) => void;
   label?: string;
 };
 
-const Dropdown: React.FC<DropdownProps> = ({ options, option, selected, onSelect, label }) => {
+const Dropdown: React.FC<DropdownProps> = ({ options, selected, onSelect, label }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(option || selected || "");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [displayLabel, setDisplayLabel] = useState<string>(
+    options?.find((opt) => opt.value === selected)?.label || ""
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter((opt) =>
-    opt.toLowerCase().includes(searchTerm.toLowerCase())
+  // Safely filter options based on search term
+  const filteredOptions = options?.filter(
+    (opt) => opt.label && opt.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Update displayed label when selected changes
+  useEffect(() => {
+    const selectedOption = options?.find((opt) => opt.value === selected);
+    setDisplayLabel(selectedOption?.label || "");
+  }, [options, selected]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -37,29 +51,32 @@ const Dropdown: React.FC<DropdownProps> = ({ options, option, selected, onSelect
       {label && <label className="text-black font-medium mb-2 block">{label}</label>}
       <input
         type="text"
-        value={option || searchTerm} // Use the static `option` if provided
-        className={`w-full text-black px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:outline-none ${
-          option ? "bg-gray-200 cursor-not-allowed" : ""
-        }`}
+        value={searchTerm || displayLabel}
+        className="w-full text-black px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:outline-none"
         placeholder="Select or search..."
-        readOnly={!!option} // Make input read-only if `option` exists
-        onFocus={() => !option && setIsOpen(true)} // Allow focus only if `option` is not preset
-        onChange={(e) => !option && setSearchTerm(e.target.value)} // Update search term only if `option` is not preset
+        onFocus={() => setIsOpen(true)}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setIsOpen(true);
+        }}
       />
-      {isOpen && !option && (
+      {isOpen && (
         <ul className="absolute w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-40 overflow-y-auto z-10">
-          {filteredOptions.length > 0 ? (
-            filteredOptions.map((opt, index) => (
+          {filteredOptions && filteredOptions.length > 0 ? (
+            filteredOptions.map((opt) => (
               <li
-                key={index}
+                key={opt.value}
                 onClick={() => {
-                  onSelect(opt); // Select the option
-                  setSearchTerm(opt); // Update input with the selected option
-                  setIsOpen(false); // Close the dropdown
+                  onSelect(opt.value);
+                  setDisplayLabel(opt.label);
+                  setSearchTerm("");
+                  setIsOpen(false);
                 }}
-                className="px-4 py-2 text-black hover:bg-yellow-300 cursor-pointer"
+                className={`px-4 py-2 text-black hover:bg-yellow-300 cursor-pointer ${
+                  opt.value === selected ? "bg-yellow-100" : ""
+                }`}
               >
-                {opt}
+                {opt.label}
               </li>
             ))
           ) : (
