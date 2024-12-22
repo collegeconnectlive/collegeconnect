@@ -10,17 +10,32 @@ type FormDataType = {
   message?: string;
 };
 
-type FormSubmitResponse = {
-  message: string; // Explicitly define that the response includes a message
+type Student = {
+  bio: string;
+  email: string;
+  id: string;
+  ig: string;
+  name: string;
+  phoneNumber: string;
+  snap: string;
+  universityId: string;
 };
 
-export const FormSubmit = async (
-  state: FormDataType
+type FormSubmitResponse = {
+  message: string; // Explicitly define that the response includes a message
+  success: boolean;
+  student?: Student;
+};
+
+export const StoreForm = async (
+  state: FormDataType,
+  setProgress: (value: number) => void
 ): Promise<FormSubmitResponse> => {
   const { name, phone, email, caption, ig, snap, schoolID, images } = state;
 
   try {
     // Step 1: Upload Images to S3 and get URLs
+    setProgress(25);
     const imageUploadFormData = new FormData();
     images.forEach((image) => imageUploadFormData.append("images", image));
     imageUploadFormData.append("school", schoolID); // switch this to id
@@ -37,6 +52,7 @@ export const FormSubmit = async (
     const { fileUrls } = await s3Response.json();
 
     // Step 2: Validate Images
+    setProgress(50);
     const awsRekResponse = await fetch("/api/verify-images", {
       method: "POST",
       headers: {
@@ -52,6 +68,7 @@ export const FormSubmit = async (
     const { validUrls } = await awsRekResponse.json();
 
     // Step 3: Submit Form Data with URLs to Prisma
+    setProgress(75);
     const formData = {
       name,
       phone,
@@ -63,7 +80,7 @@ export const FormSubmit = async (
       validUrls,
     };
 
-    const formResponse = await fetch("/api/submit-form", {
+    const formResponse = await fetch("/api/store-form", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -72,11 +89,10 @@ export const FormSubmit = async (
     if (!formResponse.ok) {
       throw new Error("Failed to submit form data");
     }
-
     const result = await formResponse.json();
-    return { message: result.message || "Form submitted successfully!" };
+    return result;
   } catch (error) {
     console.error("Error submitting form:", error);
-    return { message: "You must fillout all fields!" };
+    return { message: "You must fillout all fields!", success: false };
   }
 };

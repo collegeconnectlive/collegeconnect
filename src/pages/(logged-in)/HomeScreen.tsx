@@ -7,7 +7,7 @@ import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 import PhoneNumberInput from "@/components/PhoneNumberInput";
-import { FormSubmit } from "@/app/api/submit-form/(formSubmissionFlow)/FormSubmit";
+import { StoreForm } from "@/app/api/store-form/(StoreFormFlow)/StoreForm";
 
 type SchoolData = {
   id: string;
@@ -30,6 +30,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   const [schoolID, setSchoolID] = useState<string>(school?.id || ""); // Store selected school ID
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,15 +42,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
       caption,
       ig,
       snap,
-      schoolID: schoolID, // Pass selected school ID
+      schoolID: schoolID, 
       images,
     };
     setLoading(true);
-    const response = await FormSubmit(formData);
-
-    if (response.message?.toLowerCase().includes("success")) {
-      setLoading(false);
-      router.push("/upload-success");
+    setProgress(0); 
+    const response = await StoreForm(formData, setProgress);
+    if (response.success && response.student?.id) {
+      router.push(`preview/${response.student.id}`);
     } else {
       setLoading(false);
       setMessage(response.message || "Error occurred during upload.");
@@ -57,9 +57,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   };
 
   if (loading) {
-    return <Loading />;
+    return <Loading progress={progress}/>;
   }
-console.log(schoolID)
+
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md mx-auto">
       <h1 className="text-center font-sans text-xl font-bold">

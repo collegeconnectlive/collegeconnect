@@ -67,8 +67,6 @@ async function verifyImages(
       invalidUrls.push(url); // Treat as invalid if there's an error
     }
   }
-  console.log("valid urls: ", validUrls);
-  console.log("invalid urls: ", invalidUrls);
   return { valid: validUrls, invalid: invalidUrls };
 }
 

@@ -18,7 +18,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     if (!e.target.files) return; // If no files are selected, exit the function
     // Convert FileList (from input) to an array, and limit the number of files based on maxImages
     const newImages = Array.from(e.target.files).slice(0, maxImages - images.length);
-    // console.log(images)
+
     // Update the state with the newly selected images, ensuring no more than maxImages are selected
     setImages((prev) => [...prev, ...newImages].slice(0, maxImages)); 
   };

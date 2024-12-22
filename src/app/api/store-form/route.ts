@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { postToInstagram } from "./(InstagramAPIs)/InstagramPostAPI";
 import prisma from "@/lib/db";
 
 // Rekognition client setup with explicit credentials
@@ -35,38 +34,6 @@ export async function POST(req: Request) {
         },
       },
     });
-    console.log("in Submit Form, school id is: ", schoolID);
-    // Call Instagram posting function if conditions are met
-    if (validUrls.length > 0) {
-      try {
-        const instagramResponse = await postToInstagram({
-          caption:
-            ig && snap
-              ? `${caption}\n\nInstagram: @${ig}\nSnapchat: ${snap}`
-              : ig
-              ? `${caption}\n\nInstagram: @${ig}`
-              : snap
-              ? `${caption}\n\nSnapchat: ${snap}`
-              : `${caption}`,
-          images: validUrls,
-          schoolID: schoolID,
-        });
-
-        return NextResponse.json({
-          success: true,
-          message: "Form data saved and Instagram post published!",
-          student,
-          instagramResponse,
-        });
-      } catch (instagramError) {
-        console.error("Instagram posting failed:", instagramError);
-        return NextResponse.json({
-          success: true,
-          message: "Form data saved, but Instagram post failed.",
-          student,
-        });
-      }
-    }
 
     return NextResponse.json({
       success: true,
@@ -76,7 +43,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error saving form data:", error);
     return NextResponse.json(
-      { message: "Error saving form data" },
+      { message: "Error saving form data", success: false },
       { status: 500 }
     );
   }

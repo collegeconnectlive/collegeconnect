@@ -34,6 +34,7 @@ model Student {
 model Photo {
   id        String   @id @default(cuid())
   url       String
+  order     Int      @default(0) // Order of the photo in the list
   studentId String
   student   Student  @relation(fields: [studentId], references: [id])
   createdAt DateTime @default(now())
