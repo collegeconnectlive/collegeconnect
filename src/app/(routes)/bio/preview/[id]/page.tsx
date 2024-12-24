@@ -11,11 +11,11 @@ export default async function Page({
   const studentId = (await params).id;
   console.log(studentId);
   // Fetch the specific submission
-  const submission = await FetchStudentPost(studentId).catch((error) => {
+  const post = await FetchStudentPost(studentId).catch((error) => {
     console.error("Error fetching submission:", error);
     return null; // Return null on failure
   });
-  console.log(submission);
+  console.log(post);
   return (
     <div className="h-[100%] bg-gradient-to-tr from-rose-100 to-teal-100 z-20">
       {/* <PreviewPage submission={submission} /> */}

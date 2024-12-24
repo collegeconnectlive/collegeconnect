@@ -28,7 +28,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   const [snap, setSnap] = useState("");
   const [ig, setIG] = useState("");
   const [schoolID, setSchoolID] = useState<string>(school?.id || ""); // Store selected school ID
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<{ file: File; order: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const router = useRouter();
@@ -42,11 +42,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
       caption,
       ig,
       snap,
-      schoolID: schoolID, 
-      images,
+      schoolID,
+      images: images.map((image) => ({
+        file: image.file,
+        order: image.order,
+      })),
     };
+
     setLoading(true);
-    setProgress(0); 
+    setProgress(0);
     const response = await StoreForm(formData, setProgress);
     if (response.success && response.student?.id) {
       router.push(`preview/${response.student.id}`);

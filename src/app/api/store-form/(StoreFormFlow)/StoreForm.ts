@@ -6,12 +6,12 @@ type FormDataType = {
   email?: string;
   phone?: string;
   schoolID: string;
-  images: File[];
+  images: { file: File; order: number }[]; // Include order in the image objects
   message?: string;
 };
 
 type Student = {
-  bio: string;
+  caption: string;
   email: string;
   id: string;
   ig: string;
@@ -37,14 +37,16 @@ export const StoreForm = async (
     // Step 1: Upload Images to S3 and get URLs
     setProgress(25);
     const imageUploadFormData = new FormData();
-    images.forEach((image) => imageUploadFormData.append("images", image));
-    imageUploadFormData.append("school", schoolID); // switch this to id
+    images.forEach((image) => {
+      imageUploadFormData.append("images", image.file);
+      imageUploadFormData.append("orders", String(image.order)); // Include order with each image
+    });
+    imageUploadFormData.append("school", schoolID);
 
     const s3Response = await fetch("/api/s3-upload", {
       method: "POST",
       body: imageUploadFormData,
     });
-
     if (!s3Response.ok) {
       throw new Error("Failed to upload images to S3");
     }
@@ -67,9 +69,15 @@ export const StoreForm = async (
 
     const { validUrls } = await awsRekResponse.json();
 
-    // Step 3: Submit Form Data with URLs to Prisma
+    // Step 3: Map valid URLs back to their respective orders
+    const orderedUrls = validUrls.map((url: string, index: number) => ({
+      url,
+      order: images[index]?.order || index, // Use the provided order or fallback to index
+    }));
+
+    // Step 4: Submit Form Data with Ordered URLs to Prisma
     setProgress(75);
-    const formData = {
+    const formData: FormDataType = {
       name,
       phone,
       email,
@@ -77,7 +85,7 @@ export const StoreForm = async (
       ig,
       snap,
       schoolID,
-      validUrls,
+      images: orderedUrls, // Send ordered image URLs with order to the backend
     };
 
     const formResponse = await fetch("/api/store-form", {
@@ -93,6 +101,6 @@ export const StoreForm = async (
     return result;
   } catch (error) {
     console.error("Error submitting form:", error);
-    return { message: "You must fillout all fields!", success: false };
+    return { message: "You must fill out all fields!", success: false };
   }
 };

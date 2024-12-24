@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Bios Pages Project",
-  description: "Welcome to the students' favorite",
+  title: "College Connect",
+  description: "Welcome to the students' favorite hub",
 };
 
 export default function RootLayout({

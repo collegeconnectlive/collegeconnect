@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 
 interface SubmissionData {
   id: string;
+  caption: string;
   photos: { order: number }[];
 }
 
@@ -15,9 +16,15 @@ export async function FetchStudentPost(
   try {
     const submission = await prisma.student.findUnique({
       where: { id: studentId },
-      include: {
+      select: {
+        id: true, // Fetch the student ID
+        caption: true, // Fetch the caption
         photos: {
-          orderBy: { order: "asc" }, // Ensure photos are returned in the correct order
+          select: {
+            url: true,
+            order: true, // Fetch only the `order` field from the related photos
+          },
+          orderBy: { order: "asc" }, // Ensure photos are ordered by their `order` value
         },
       },
     });

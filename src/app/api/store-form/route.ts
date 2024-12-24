@@ -1,17 +1,26 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-// Rekognition client setup with explicit credentials
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, phone, email, caption, ig, snap, schoolID, validUrls } = body;
+    const { name, phone, email, caption, ig, snap, schoolID, images } = body;
 
-    if (!name || !schoolID || !validUrls || validUrls.length === 0) {
+    // Validate required fields
+    if (!name || !schoolID || !images || images.length === 0) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
+      );
+    }
+    const universityExists = await prisma.university.findUnique({
+      where: { id: schoolID },
+    });
+
+    if (!universityExists) {
+      return NextResponse.json(
+        { message: "University not found", success: false },
+        { status: 404 }
       );
     }
 
@@ -19,18 +28,21 @@ export async function POST(req: Request) {
     const student = await prisma.student.create({
       data: {
         name,
-        bio: caption,
+        caption: caption,
         phoneNumber: phone,
-        email: email,
-        ig: ig,
-        snap: snap,
+        email,
+        ig,
+        snap,
         university: {
           connect: {
-            id: schoolID, // Ensure this field is unique or has a unique constraint
+            id: schoolID,
           },
         },
         photos: {
-          create: validUrls.map((url: string) => ({ url })),
+          create: images.map((photo: { url: string; order: number }) => ({
+            url: photo.url,
+            order: photo.order,
+          })),
         },
       },
     });

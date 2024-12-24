@@ -21,7 +21,7 @@ model University {
 model Student {
   id           String     @id @default(cuid())
   name         String
-  bio          String
+  caption      String
   ig           String?
   snap         String?
   email        String?
