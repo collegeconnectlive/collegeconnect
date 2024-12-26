@@ -8,12 +8,13 @@ interface SchoolData {
 export async function FetchSchools(): Promise<SchoolData[]> {
   try {
     const schools = await prisma.university.findMany({
-      select: { id: true, name: true },
+      select: { id: true, name: true, slug: true },
     });
 
     return schools.map((school) => ({
       id: school.id,
       name: school.name,
+      slug: school.slug,
     }));
   } catch (error) {
     console.error("Error fetching schools:", error);

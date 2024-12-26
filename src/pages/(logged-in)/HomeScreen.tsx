@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import Button from "@/components/Button";
 import TextInput from "@/components/TextInput";
@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 import PhoneNumberInput from "@/components/PhoneNumberInput";
 import { StoreForm } from "@/app/api/store-form/(StoreFormFlow)/StoreForm";
+import { useSharedPostContext } from "@/context/SharedPostContext";
+import updateCaption from "@/utils/AppendToCaption";
 
 type SchoolData = {
   id: string;
@@ -20,40 +22,38 @@ type HomeScreenProps = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
+  const { caption, setCaption, images, setImages, setProgress, progress } = useSharedPostContext();
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [caption, setCaption] = useState("");
   const [phone, setPhone] = useState("");
   const [snap, setSnap] = useState("");
   const [ig, setIG] = useState("");
   const [schoolID, setSchoolID] = useState<string>(school?.id || ""); // Store selected school ID
-  const [images, setImages] = useState<{ file: File; order: number }[]>([]);
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const updatedCaption = updateCaption(caption, ig, snap);
+    setCaption(updatedCaption);
     const formData = {
       name,
       phone,
       email,
-      caption,
       ig,
       snap,
       schoolID,
-      images: images.map((image) => ({
-        file: image.file,
-        order: image.order,
-      })),
     };
 
     setLoading(true);
     setProgress(0);
+
+    // Submit to StoreForm
     const response = await StoreForm(formData, setProgress);
-    if (response.success && response.student?.id) {
-      router.push(`preview/${response.student.id}`);
+
+    if (response.success) {
+      router.push(`preview/${schoolID}`);
     } else {
       setLoading(false);
       setMessage(response.message || "Error occurred during upload.");
@@ -61,7 +61,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   };
 
   if (loading) {
-    return <Loading progress={progress}/>;
+    return <Loading progress={progress} />;
   }
 
   return (
@@ -87,10 +87,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      {/* Dropdown for schools */}
       <Dropdown
         label="Select Your School"
-        options={schools.map((school) => ({ value: school.id, label: school.name }))} // Map to Dropdown options
+        options={schools.map((school) => ({
+          value: school.id,
+          label: school.name,
+        }))} // Map to Dropdown options
         selected={schoolID}
         onSelect={(value) => setSchoolID(value)} // Store the school ID
       />
@@ -122,8 +124,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
         images={images}
         setImages={setImages}
       />
-      <Button label="Submit" type="submit" />
-      <div className="text-green-600 text-lg">{message}</div>
+      <Button label="Continue" type="submit" />
+      <div className="text-red-600 text-lg">{message}</div>
     </form>
   );
 };

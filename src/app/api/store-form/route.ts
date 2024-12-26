@@ -4,15 +4,24 @@ import prisma from "@/lib/db";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, phone, email, caption, ig, snap, schoolID, images } = body;
+    const { name, phone, email, ig, schoolID, snap } = body;
 
-    // Validate required fields
-    if (!name || !schoolID || !images || images.length === 0) {
+    const missingFields = [];
+
+    if (!name) missingFields.push("name");
+    if (!phone) missingFields.push("phone");
+    if (!email) missingFields.push("email");
+    if (!schoolID) missingFields.push("school");
+
+    // Check if there are any missing fields
+    if (missingFields.length > 0) {
+      const missingMessage = missingFields.join(", ");
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: `Missing required fields: ${missingMessage}` },
         { status: 400 }
       );
     }
+
     const universityExists = await prisma.university.findUnique({
       where: { id: schoolID },
     });
@@ -28,7 +37,6 @@ export async function POST(req: Request) {
     const student = await prisma.student.create({
       data: {
         name,
-        caption: caption,
         phoneNumber: phone,
         email,
         ig,
@@ -37,12 +45,6 @@ export async function POST(req: Request) {
           connect: {
             id: schoolID,
           },
-        },
-        photos: {
-          create: images.map((photo: { url: string; order: number }) => ({
-            url: photo.url,
-            order: photo.order,
-          })),
         },
       },
     });

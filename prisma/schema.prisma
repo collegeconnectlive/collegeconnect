@@ -21,21 +21,10 @@ model University {
 model Student {
   id           String     @id @default(cuid())
   name         String
-  caption      String
   ig           String?
   snap         String?
   email        String?
   phoneNumber  String
   universityId String
   university   University @relation(fields: [universityId], references: [id])
-  photos       Photo[] // One-to-many relationship with Photo
-}
-
-model Photo {
-  id        String   @id @default(cuid())
-  url       String
-  order     Int      @default(0) // Order of the photo in the list
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  createdAt DateTime @default(now())
 }
