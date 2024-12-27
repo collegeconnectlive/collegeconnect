@@ -21,10 +21,10 @@ export const SubmitToInstagram = async (
   try {
     // Step 1: Upload Images to S3 and get URLs
     setProgress(50);
+    const sortedImages = images.sort((a, b) => a.order - b.order);
     const imageUploadFormData = new FormData();
-    images.forEach((image) => {
+    sortedImages.forEach((image) => {
       imageUploadFormData.append("images", image.file);
-      imageUploadFormData.append("orders", String(image.order)); // Include order with each image
     });
     imageUploadFormData.append("school", schoolID);
 
@@ -53,19 +53,12 @@ export const SubmitToInstagram = async (
     }
 
     const { validUrls } = await awsRekResponse.json();
-
-    // Step 3: Map valid URLs back to their respective orders
-    const orderedUrls = validUrls.map((url: string, index: number) => ({
-      url,
-      order: images[index]?.order || index, // Use the provided order or fallback to index
-    }));
-
     // Step 4: Submit Form Data with Ordered URLs to Prisma
     setProgress(90);
     const formData: FormDataType = {
       caption,
       schoolID,
-      images: orderedUrls, // Send ordered image URLs with order to the backend
+      images: validUrls, // Send ordered image URLs with order to the backend
     };
 
     const formResponse = await fetch("/api/post-to-instagram", {

@@ -1,16 +1,16 @@
-
-import { PreviewPost } from "@/pages/(logged-in)/PreviewPost";
+import PreviewPost from "@/pages/(logged-in)/PreviewPost";
+// import PreviewPostWrapper from "@/pages/wrappers/PreviewPostWrapper";
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string}>;
+  params: Promise<{ id: string }>;
 }) {
   const schoolID = (await params).id;
 
   return (
-    <div className=" bg-gradient-to-tr from-rose-100 to-teal-100 z-20">
-      <PreviewPost schoolID = {schoolID}/>
+    <div className="bg-gradient-to-tr from-rose-100 to-teal-100 z-20">
+      <PreviewPost schoolID={schoolID} />
     </div>
   );
 }

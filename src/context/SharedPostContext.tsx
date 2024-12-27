@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { createContext, useContext, useState } from "react";
 
 type ImageData = { file: File; order: number };
@@ -12,24 +12,39 @@ type SharedPostContextType = {
   setProgress: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const SharedPostContext = createContext<SharedPostContextType | undefined>(undefined);
+// Provide default values for the context
+const defaultContextValue: SharedPostContextType = {
+  caption: "",
+  setCaption: () => {}, // No-op function for default
+  images: [],
+  setImages: () => {}, // No-op function for default
+  progress: 0,
+  setProgress: () => {}, // No-op function for default
+};
+
+const SharedPostContext = createContext<SharedPostContextType>(defaultContextValue);
 
 export const SharedPostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [caption, setCaption] = useState<string>("");
   const [images, setImages] = useState<ImageData[]>([]);
-  const [progress, setProgress]= useState<number>(0);
+  const [progress, setProgress] = useState<number>(0);
 
   return (
-    <SharedPostContext.Provider value={{ caption, setCaption, images, setImages, setProgress, progress }}>
+    <SharedPostContext.Provider
+      value={{
+        caption,
+        setCaption,
+        images,
+        setImages,
+        progress,
+        setProgress,
+      }}
+    >
       {children}
     </SharedPostContext.Provider>
   );
 };
 
-export const useSharedPostContext = () => {
-  const context = useContext(SharedPostContext);
-  if (!context) {
-    throw new Error("useSharedPostContext must be used within a SharedPostProvider");
-  }
-  return context;
+export const useSharedPostContext = (): SharedPostContextType => {
+  return useContext(SharedPostContext);
 };

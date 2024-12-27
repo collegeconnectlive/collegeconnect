@@ -12,24 +12,33 @@ import { SubmitToInstagram } from "@/app/api/(previewPost)/SubmitToInstagram";
 type PreviewPostProps = {
   schoolID: string;
 };
-export const PreviewPost: React.FC<PreviewPostProps> = ({ schoolID }) => {
-  const { caption, setCaption, images, setImages, progress, setProgress } = useSharedPostContext();
-  const [message, setMessage]= useState("")
+
+const PreviewPost: React.FC<PreviewPostProps> = ({ schoolID }) => {
+  const { caption, setCaption, images, setImages, progress, setProgress } =
+    useSharedPostContext();
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation: Ensure caption is not empty and at least one image exists
+    if (!caption.trim() || images.length === 0) {
+      setMessage("Please write a caption and upload at least one picture.");
+      return;
+    }
+
     const formData = {
       caption,
       images,
-      schoolID
+      schoolID,
     };
 
     setLoading(true);
     setProgress(50);
 
-    // Submit to StoreForm
+    // Submit to SubmitToInstagram API
     const response = await SubmitToInstagram(formData, setProgress);
 
     if (response.success) {
@@ -40,17 +49,17 @@ export const PreviewPost: React.FC<PreviewPostProps> = ({ schoolID }) => {
     }
   };
 
-  if (loading) return <Loading progress={progress} />
+  if (loading) return <Loading progress={progress} />;
 
   return (
-    <form onSubmit={handleSubmit}  className="p-6 space-y-4 max-w-md mx-auto">
+    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold text-center text-black">
         Review Your Post
       </h1>
 
       <TextInput
         label="Review & Edit Your Caption"
-        placeholder="Personal or school email"
+        placeholder="Write your caption here"
         value={caption}
         multiLine
         rows={5}
@@ -66,4 +75,6 @@ export const PreviewPost: React.FC<PreviewPostProps> = ({ schoolID }) => {
       <div className="text-red-600 text-lg">{message}</div>
     </form>
   );
-}
+};
+
+export default PreviewPost;

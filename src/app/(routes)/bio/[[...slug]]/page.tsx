@@ -6,9 +6,9 @@ import { FetchSchools } from "@/app/api/(fetchSchools)/FetchSchools";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug?: string }>; // Make slug optional
 }) {
-  const slug = (await params).slug;
+  const slug = (await params)?.slug;
 
   // Fetch both schools and a specific school in parallel
   const [schools, school] = await Promise.all([
@@ -16,14 +16,16 @@ export default async function Page({
       console.error("Error fetching schools:", error);
       return []; // Return an empty array on failure
     }),
-    FetchSchool(slug).catch((error) => {
-      console.error("Error fetching school:", error);
-      return null; // Return null on failure
-    }),
+    slug
+      ? FetchSchool(slug[0]).catch((error) => {
+          console.error("Error fetching school:", error);
+          return null; // Return null on failure
+        })
+      : Promise.resolve(null), // Skip fetching if slug is undefined
   ]);
 
   return (
-    <div>
+    <div className="bg-gradient-to-tr from-rose-100 to-teal-100 ">
       <HomeScreen schools={schools} school={school} />
     </div>
   );

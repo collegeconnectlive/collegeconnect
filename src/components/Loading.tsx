@@ -1,5 +1,5 @@
 type LoadingProps = {
-  progress: number;
+  progress?: number;
 };
 
 const Loading: React.FC<LoadingProps> = ({ progress }) => {
@@ -13,9 +13,7 @@ const Loading: React.FC<LoadingProps> = ({ progress }) => {
         ></div>
       </div>
       <p className="text-sm text-gray-600 mt-2">
-        {progress < 100
-          ? `Processing... (${progress}%)`
-          : "Submission Complete!"}
+        {progress && progress < 100 && `Processing... (${progress}%)`}
       </p>
     </div>
   );

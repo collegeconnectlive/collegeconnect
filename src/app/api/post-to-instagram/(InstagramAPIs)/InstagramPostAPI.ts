@@ -1,9 +1,13 @@
 import postCarousel from "./postCarousel";
 import postSingleImage from "./postSingleImage";
 
+if (!process.env.INSTAGRAM_ACCESS_TOKEN) {
+  throw new Error(`Missing required Instagram Access Token`);
+}
+
 const API_VERSION = "v21.0"; // Replace with the latest version
-const PAGE_ACCESS_TOKEN =
-  "EAAd7hi61tAEBOZB1tboHwekMhQr62tVjkZAdsxtwSLA98yVN7oKrZCzaPlqfmU7KymblApMO0cvAGiFry2ND27QVxHAxkpRqZAdpmN9AGrtTlxTwmZAUnYuKJbeaMisn8IlS3ZBZAs35sfyzOl69t5JIgZCZCAPBMv64UtBCSrUTmYGJek18p7DrmK4ZAeVSBVHq03KhtjhZCB8h09CqerujS03QrkwOZCWTMqwj1QZDZD"; // Store securely in your .env file
+const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN;
+
 type MediaPayload = {
   caption: string;
   images: string[]; // Array of image files

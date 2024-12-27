@@ -53,7 +53,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
     const response = await StoreForm(formData, setProgress);
 
     if (response.success) {
-      router.push(`preview/${schoolID}`);
+      if (school) {
+        router.push(`preview/${schoolID}`);
+      } else {
+        router.push(`bio/preview/${schoolID}`);
+      }
+    
     } else {
       setLoading(false);
       setMessage(response.message || "Error occurred during upload.");
@@ -65,7 +70,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md mx-auto">
+    <form onSubmit={handleSubmit} className=" p-6 space-y-4 max-w-md mx-auto">
       <h1 className="text-center font-sans text-xl font-bold">
         Fill Out Your Information:
       </h1>
@@ -89,7 +94,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
       />
       <Dropdown
         label="Select Your School"
-        options={schools.map((school) => ({
+        options={schools?.map((school) => ({
           value: school.id,
           label: school.name,
         }))} // Map to Dropdown options
