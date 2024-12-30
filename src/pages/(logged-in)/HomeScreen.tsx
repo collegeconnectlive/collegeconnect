@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import Button from "@/components/Button";
 import TextInput from "@/components/TextInput";
@@ -31,10 +32,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   const [ig, setIG] = useState("");
   const [schoolID, setSchoolID] = useState<string>(school?.id || ""); // Store selected school ID
   const [loading, setLoading] = useState(false);
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreedToPolicy) {
+      setMessage("You must agree to the privacy policy to continue.");
+      return;
+    }
+
     const updatedCaption = updateCaption(caption, ig, snap);
     setCaption(updatedCaption);
     const formData = {
@@ -58,7 +65,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
       } else {
         router.push(`bio/preview/${schoolID}`);
       }
-    
     } else {
       setLoading(false);
       setMessage(response.message || "Error occurred during upload.");
@@ -70,7 +76,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className=" p-6 space-y-4 max-w-md mx-auto">
+    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md mx-auto">
       <h1 className="text-center font-sans text-xl font-bold">
         Fill Out Your Information:
       </h1>
@@ -129,6 +135,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
         images={images}
         setImages={setImages}
       />
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="agreeToPolicy"
+          checked={agreedToPolicy}
+          onChange={(e) => setAgreedToPolicy(e.target.checked)}
+          className="form-checkbox h-4 w-4 text-yellow-500"
+        />
+        <label htmlFor="agreeToPolicy" className="text-gray-700 text-sm">
+          I agree to the <a href="/privacy" className="text-yellow-500 underline">Privacy Policy</a> terms and conditions.
+        </label>
+      </div>
       <Button label="Continue" type="submit" />
       <div className="text-red-600 text-lg">{message}</div>
     </form>
