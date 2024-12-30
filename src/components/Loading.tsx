@@ -13,7 +13,7 @@ const Loading: React.FC<LoadingProps> = ({ progress }) => {
         ></div>
       </div>
       <p className="text-sm text-gray-600 mt-2">
-        {progress && progress < 100 && `Processing... (${progress}%)`}
+        {progress && progress < 100 ? `Processing... (${progress}%)` : "Routing"}
       </p>
     </div>
   );

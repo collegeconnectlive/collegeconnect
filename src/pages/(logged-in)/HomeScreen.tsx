@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import TextInput from "@/components/TextInput";
 import Dropdown from "@/components/DropDown";
 import ImageUpload from "@/components/ImageUpload";
+import AgreementCheckbox from "@/components/AgreementCheckbox";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 import PhoneNumberInput from "@/components/PhoneNumberInput";
@@ -33,12 +34,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
   const [schoolID, setSchoolID] = useState<string>(school?.id || ""); // Store selected school ID
   const [loading, setLoading] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedToPolicy) {
-      setMessage("You must agree to the privacy policy to continue.");
+      setMessage("You must agree to the terms and conditions to continue.");
       return;
     }
 
@@ -135,18 +138,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ schools, school }) => {
         images={images}
         setImages={setImages}
       />
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="agreeToPolicy"
-          checked={agreedToPolicy}
-          onChange={(e) => setAgreedToPolicy(e.target.checked)}
-          className="form-checkbox h-4 w-4 text-yellow-500"
-        />
-        <label htmlFor="agreeToPolicy" className="text-gray-700 text-sm">
-          I agree to the <a href="/privacy" className="text-yellow-500 underline">Privacy Policy</a> terms and conditions.
-        </label>
-      </div>
+      <AgreementCheckbox
+        isChecked={agreedToTerms}
+        onChange={setAgreedToTerms}
+        text="I adhere to the"
+        link={{
+          href: "/terms",
+          label: "Terms of Service",
+        }}
+      />
+      <AgreementCheckbox
+        isChecked={agreedToPolicy}
+        onChange={setAgreedToPolicy}
+        text="I agree to the"
+        link={{
+          href: "/privacy",
+          label: "Privacy Policy",
+        }}
+      />
       <Button label="Continue" type="submit" />
       <div className="text-red-600 text-lg">{message}</div>
     </form>
