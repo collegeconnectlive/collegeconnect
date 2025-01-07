@@ -30,10 +30,18 @@ export async function POST(req: Request) {
     } catch (instagramError) {
       // Log the Instagram error for debugging
       console.error("Instagram posting failed:", instagramError);
+
+      // Return detailed error for debugging (remove in production for security reasons)
       return NextResponse.json(
         {
           success: false,
           message: "Instagram post failed. Please try again later.",
+          error:
+            instagramError instanceof Error
+              ? instagramError.message
+              : String(instagramError),
+          stack:
+            instagramError instanceof Error ? instagramError.stack : undefined,
         },
         { status: 500 }
       );
@@ -41,9 +49,13 @@ export async function POST(req: Request) {
   } catch (error) {
     // Log any unexpected errors for debugging
     console.error("Unexpected error:", error);
+
+    // Return detailed error for debugging (remove in production for security reasons)
     return NextResponse.json(
       {
         message: "An unexpected error occurred. Please try again later.",
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );

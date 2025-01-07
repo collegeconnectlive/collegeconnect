@@ -54,7 +54,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex flex-col space-y-2 select-none">
       {label && <label className="text-gray-700 font-medium">{label}</label>}
       <div className="border border-gray-300 rounded p-4">
         <div className="flex flex-wrap gap-4">

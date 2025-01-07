@@ -68,6 +68,7 @@ export const SubmitToInstagram = async (
     });
 
     if (!formResponse.ok) {
+      console.log("I'm in the Graph API \n", formResponse);
       throw new Error("Failed to submit form data");
     }
     const result = await formResponse.json();
