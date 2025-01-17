@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { postToInstagram } from "./(InstagramAPIs)/InstagramPostAPI";
-
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   try {
     const body = await req.json();

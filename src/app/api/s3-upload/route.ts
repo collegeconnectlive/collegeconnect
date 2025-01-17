@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { extname } from "path";
+import { convertToJpeg } from "@/utils/ConvertImgType";
 
 // Validate environment variables
 if (
@@ -95,14 +96,20 @@ export async function POST(req: Request) {
     const uploadPromises = images.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());
       const fileName = `${Date.now()}-${file.name}`; // Generate unique file name
-      return uploadFileToS3(buffer, fileName, school);
+
+      // Check for HEIC or WEBP and convert if necessary
+      const ext = extname(fileName).toLowerCase();
+      const isConvertible = ext === ".heic" || ext === ".webp";
+
+      const { buffer: finalBuffer, fileName: newFileName } = isConvertible
+        ? await convertToJpeg(buffer, fileName)
+        : { buffer, fileName };
+
+      return uploadFileToS3(finalBuffer, newFileName, school);
     });
 
     // Wait for all uploads to finish
     const fileUrls = await Promise.all(uploadPromises);
-
-    // Encode URLs before returning them
-    // const encodedFileUrls = fileUrls.map((url) => encodeURIComponent(url));
 
     return NextResponse.json({ success: true, fileUrls: fileUrls });
   } catch (error) {

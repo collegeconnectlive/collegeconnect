@@ -75,6 +75,6 @@ export const SubmitToInstagram = async (
     return result;
   } catch (error) {
     console.error("Error submitting form:", error);
-    return { message: "You must fill out all fields!", success: false };
+    return { message: "Instagram post failed!", success: false };
   }
 };

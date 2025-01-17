@@ -42,7 +42,7 @@ const PreviewPost: React.FC<PreviewPostProps> = ({ schoolID }) => {
     const response = await SubmitToInstagram(formData, setProgress);
 
     if (response.success) {
-      router.push("upload-success");
+      router.push(`upload-success/${schoolID}`);
     } else {
       setLoading(false);
       setMessage(response.message || "Error occurred during upload.");
