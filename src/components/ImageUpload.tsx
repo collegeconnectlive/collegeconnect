@@ -26,8 +26,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleRemoveImage = (event: React.MouseEvent, index: number) => {
-    event.preventDefault(); 
-    event.stopPropagation(); 
+    event.preventDefault();
+    event.stopPropagation();
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -35,15 +35,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setDraggingIndex(index);
   };
 
-  const handleDragOver = (index: number) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
     if (draggingIndex === null || draggingIndex === index) return;
+
     const reorderedImages = [...images];
     const [draggedImage] = reorderedImages.splice(draggingIndex, 1);
     reorderedImages.splice(index, 0, draggedImage);
+
     setImages(
       reorderedImages.map((img, idx) => ({
         ...img,
-        order: idx, // Update order based on new position
+        order: idx,
       }))
     );
     setDraggingIndex(index);
@@ -51,6 +54,43 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleDragEnd = () => {
     setDraggingIndex(null);
+  };
+
+  const handleTouchStart = (index: number) => {
+    setDraggingIndex(index);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!element) return;
+
+    const parent = element.closest("[data-index]");
+    if (parent) {
+      const targetIndex = parseInt(parent.getAttribute("data-index") || "-1", 10);
+      if (targetIndex !== draggingIndex && targetIndex >= 0) {
+        const reorderedImages = [...images];
+        const [draggedImage] = reorderedImages.splice(draggingIndex!, 1);
+        reorderedImages.splice(targetIndex, 0, draggedImage);
+
+        setImages(
+          reorderedImages.map((img, idx) => ({
+            ...img,
+            order: idx,
+          }))
+        );
+        setDraggingIndex(targetIndex);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setDraggingIndex(null);
+  };
+
+  const preventContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
   };
 
   return (
@@ -61,13 +101,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           {images.map((image, index) => (
             <div
               key={index}
+              data-index={index}
               draggable
               onDragStart={() => handleDragStart(index)}
-              onDragOver={(e) => {
-                e.preventDefault();
-                handleDragOver(index);
-              }}
+              onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
+              onTouchStart={() => handleTouchStart(index)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onContextMenu={preventContextMenu}
               className="relative w-24 h-24 cursor-move"
             >
               <Image
@@ -77,7 +119,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 className="object-cover rounded"
               />
               <button
-                onClick={(e) => handleRemoveImage(e, index)} // Pass the event to prevent default
+                onClick={(e) => handleRemoveImage(e, index)}
                 className="absolute top-0 right-0 bg-black text-white text-sm rounded-full w-6 h-6 flex items-center justify-center"
               >
                 ✕

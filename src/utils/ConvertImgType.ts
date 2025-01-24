@@ -17,7 +17,10 @@ export async function convertToJpeg(
   const ext = extname(fileName).toLowerCase();
 
   // Check if the file type is WEBP or HEIC
-  if (ext === ".webp" || ext === ".heic") {
+  if (
+    ext.toLocaleLowerCase() === ".webp" ||
+    ext.toLocaleLowerCase() === ".heic"
+  ) {
     try {
       // Convert the image to JPEG using sharp
       const convertedBuffer = await sharp(buffer)

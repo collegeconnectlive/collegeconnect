@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { extname } from "path";
 import { convertToJpeg } from "@/utils/ConvertImgType";
+import { validateAndCropImage } from "@/utils/ValidateAndCrop";
 
 // Validate environment variables
 if (
@@ -95,7 +96,9 @@ export async function POST(req: Request) {
     // Upload each file to S3
     const uploadPromises = images.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `${Date.now()}-${file.name}`; // Generate unique file name
+      let fileName = `${Date.now()}-${file.name}`; // Generate unique file name
+      // Remove all spaces from the file name
+      fileName = fileName.replace(/\s+/g, "_"); // Replace all spaces with underscores for better readability
 
       // Check for HEIC or WEBP and convert if necessary
       const ext = extname(fileName).toLowerCase();
@@ -104,8 +107,8 @@ export async function POST(req: Request) {
       const { buffer: finalBuffer, fileName: newFileName } = isConvertible
         ? await convertToJpeg(buffer, fileName)
         : { buffer, fileName };
-
-      return uploadFileToS3(finalBuffer, newFileName, school);
+      const croppedBuffer = await validateAndCropImage(finalBuffer);
+      return uploadFileToS3(croppedBuffer, newFileName, school);
     });
 
     // Wait for all uploads to finish
